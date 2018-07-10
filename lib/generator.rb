@@ -1,17 +1,12 @@
 # frozen_string_literal: true
+require "jekyll"
 
-module JekyllCategorizePages
+module Jekyll
 
   # Injects front matter defaults to set default category/sub-category values
   class CategorizePageGenerator < Jekyll::Generator
-    attr_accessor :site
-
     # priority :high
     safe true
-    
-    def initialize(site)
-      @site = site
-    end
 
     def get_collection(name)
       @site.collections[name] ? @site.collections[name].docs : []
