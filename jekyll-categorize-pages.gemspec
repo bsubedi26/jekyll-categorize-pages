@@ -4,7 +4,7 @@ $LOAD_PATH.unshift File.expand_path("lib", __dir__)
 
 Gem::Specification.new do |s|
   s.name          = "jekyll-categorize-pages"
-  s.version       = "0.1.1".freeze
+  s.version       = "0.1.2".freeze
   s.authors       = [""]
   s.email         = [""]
   s.homepage      = ""
