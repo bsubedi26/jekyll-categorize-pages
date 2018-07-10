@@ -2,15 +2,9 @@
 require "jekyll"
 
 module Jekyll
-  # You can create a generator when you need Jekyll
-  # to create additional content based on your own rules.
-
-  # A generator is a subclass of Jekyll::Generator that defines a generate method,
-  # which receives an instance of Jekyll::Site. The return value of generate is ignored.
-
 
   # Injects front matter defaults to set default category/sub-category values
-  class InjectFm < Jekyll::Generator
+  class CategorizePageGenerator < Jekyll::Generator
     # priority :high
     safe true
 
@@ -18,7 +12,7 @@ module Jekyll
       @site.collections[name] ? @site.collections[name].docs : []
     end
 
-    def add_to_frontmatter(item, values)
+    def add_category_and_sub_category(item, values)
       # puts "adding: #{item.relative_path}"
       # puts "values: #{values}"
 
@@ -35,32 +29,26 @@ module Jekyll
 
     
     def isValid?(item)
-        all_categories = @site.data["all_categories"] || [] # sub folders inside collection
-        path = item.relative_path.split('/')
+      all_categories = @site.data["all_categories"] || [] # sub folders inside collection
+      path = item.relative_path.split('/')
 
-        category = path[1] if path[1] != "index.md"
-        
-        # ignore index.md pages
-        if path.include?("index.md")
-          return false
-        end
+      category = path[1] if path[1] != "index.md"
+      
+      # ignore index.md pages
+      if path.include?("index.md")
+        return false
+      end
 
-        # if category folder has no sub categories
-        if path.length == 3
-          # puts "path: #{path}"
-          # puts "length: #{path.length}"
-          header_values = get_header_values_to_add(item)
-          add_category_only(item, header_values)
-          return false
-        end
+      # if category folder has no sub categories
+      if path.length == 3
+        # puts "path: #{path}"
+        # puts "length: #{path.length}"
+        header_values = get_header_values_to_add(item)
+        add_category_only(item, header_values)
+        return false
+      end
 
-        return all_categories.include?(category)
-
-        # if path.include?("index.md")
-        #   return false
-        # else
-        #   return all_categories.include?(category)
-        # end
+      return all_categories.include?(category)
     end
 
 
@@ -96,13 +84,11 @@ module Jekyll
           if valid_category
             header_values = get_header_values_to_add(item)
             # puts "header_values: #{header_values}"
-            add_to_frontmatter(item, header_values)
+            add_category_and_sub_category(item, header_values)
           end
         end
       end
-
     end
 
   end
-
 end
