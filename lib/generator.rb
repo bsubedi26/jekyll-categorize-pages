@@ -42,18 +42,18 @@ module Jekyll
 
     def generate(site)
       puts "RAN!"
-      @site = site
-      # The collections to add category/sub category front matter values
-      collections = ["pages"] # TODO: Move this variable to _config/_data
+      # @site = site
+      # # The collections to add category/sub category front matter values
+      # collections = ["pages"] # TODO: Move this variable to _config/_data
 
-      for c in collections
-        for item in get_collection(c)
-          valid_category = isValid?(item)
-          if valid_category
-            add_to_frontmatter(item)
-          end
-        end
-      end
+      # for c in collections
+      #   for item in get_collection(c)
+      #     valid_category = isValid?(item)
+      #     if valid_category
+      #       add_to_frontmatter(item)
+      #     end
+      #   end
+      # end
 
     end
 
