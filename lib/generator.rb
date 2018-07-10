@@ -2,60 +2,107 @@
 require "jekyll"
 
 module Jekyll
-  
+  # You can create a generator when you need Jekyll
+  # to create additional content based on your own rules.
+
+  # A generator is a subclass of Jekyll::Generator that defines a generate method,
+  # which receives an instance of Jekyll::Site. The return value of generate is ignored.
+
+
   # Injects front matter defaults to set default category/sub-category values
-  class CategorizePagesGenerator < Jekyll::Generator
+  class InjectFm < Jekyll::Generator
     # priority :high
     safe true
-
-    def log(*args)
-      puts args
-    end
 
     def get_collection(name)
       @site.collections[name] ? @site.collections[name].docs : []
     end
 
-    def add_to_frontmatter(item)
-      item.data["category"] = @category # i.data is the front matter header
-      item.data["sub_category"] = @sub_category
+    def add_to_frontmatter(item, values)
+      # puts "adding: #{item.relative_path}"
+      # puts "values: #{values}"
+
+      item.data["category"] = values[:category] # i.data is the front matter header
+      item.data["sub_category"] = values[:sub_category]
+    end
+
+    def add_category_only(item, values)
+      # puts "adding: #{item.relative_path}"
+      # puts "values: #{values}"
+      item.data["category"] = values[:category]
+      # item.data["sub_category"] = values[:sub_category].slice(0, values[:sub_category].length - 3)
     end
 
     
     def isValid?(item)
-        folders_to_categorize = @site.data["pagerrr_folders_to_categorize"] || []
-        puts folders_to_categorize
-        # all_categories.include?(page[:n])
+        all_categories = @site.data["all_categories"] || [] # sub folders inside collection
         path = item.relative_path.split('/')
-        # category = path[0].sub(/^_/, '') # Remove first letter if underscore
-        @category = path[1] if path[1] != "index.md"
-        @sub_category = path[2] if path[2] != "index.md"
-        file = path[3] if path[3] != "index.md"
-        # puts '^^^^^^^^^^^^^'
-        # puts @category
-        # puts @sub_category
 
-      return folders_to_categorize.include?(@category)
+        category = path[1] if path[1] != "index.md"
+        
+        # ignore index.md pages
+        if path.include?("index.md")
+          return false
+        end
+
+        # if category folder has no sub categories
+        if path.length == 3
+          # puts "path: #{path}"
+          # puts "length: #{path.length}"
+          header_values = get_header_values_to_add(item)
+          add_category_only(item, header_values)
+          return false
+        end
+
+        return all_categories.include?(category)
+
+        # if path.include?("index.md")
+        #   return false
+        # else
+        #   return all_categories.include?(category)
+        # end
     end
 
 
+    def get_header_values_to_add(item)
+      all_categories = @site.data["all_categories"] || [] # sub folders inside collection
+      # puts "-----------------------"
+      # puts "all_categories: #{all_categories}"
+      # puts "item.relative_path: #{item.relative_path}"
+
+      path = item.relative_path.split('/')
+      category = path[1] if path[1] != "index.md"
+      # puts "@category: #{@category}"
+      sub_category = path[2] if path[2] != "index.md"
+      # puts "@sub_category: #{@sub_category}"
+      file = path[3] if path[3] != "index.md"
+      # puts "file: #{file}"
+
+      return {
+        :category => category,
+        :sub_category => sub_category,
+        :file => file
+      }
+    end
 
     def generate(site)
-      puts "RAN!"
-      # @site = site
-      # # The collections to add category/sub category front matter values
-      # collections = ["pages"] # TODO: Move this variable to _config/_data
+      @site = site
+      # The collections to add category/sub category front matter values
+      collections = ["pages"] # TODO: Move this variable to _config/_data
 
-      # for c in collections
-      #   for item in get_collection(c)
-      #     valid_category = isValid?(item)
-      #     if valid_category
-      #       add_to_frontmatter(item)
-      #     end
-      #   end
-      # end
+      for c in collections
+        for item in get_collection(c)
+          valid_category = isValid?(item)
+          if valid_category
+            header_values = get_header_values_to_add(item)
+            # puts "header_values: #{header_values}"
+            add_to_frontmatter(item, header_values)
+          end
+        end
+      end
 
     end
 
   end
+
 end
